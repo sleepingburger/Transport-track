@@ -116,7 +116,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
         if(checkMapServices()){
             if(mLocationPermissionGranted){
-                getUserDetails();
+                //getUserDetails();
+                getLastKnownLocation();
             }
             else{
                 getLocationPermission();
@@ -139,7 +140,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
-            getUserDetails();
+            //getUserDetails();
+            getLastKnownLocation();
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
@@ -163,7 +165,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         User user = task.getResult().toObject(User.class);
                         mUserLocation.setUser(user);
                         ((UserClient)(getApplication())).setUser(mUserLocation.getUser());
-                        getLastKnownLocation();
+                        //getLastKnownLocation();
+
                     }
                 }
             });
@@ -174,10 +177,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+
     //retrieving the last known location
     //success
     private void getLastKnownLocation(){
         Log.d(TAG, "getLastKnownLocation: called.");
+
+        DocumentReference locationRef = mDb
+                .collection(getString(R.string.collection_user_locations))
+                .document(FirebaseAuth.getInstance().getUid());
+
+        locationRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful() && task.getResult() != null){
+                    mUserLocation = task.getResult().toObject(UserLocation.class);
+                    Log.d(TAG, "onComplete: success in retrieving last saved location");
+                }
+            }
+        });
+
+
+
+        /*
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -206,6 +228,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+*/
     }
 
 

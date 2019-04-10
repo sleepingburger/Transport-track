@@ -90,19 +90,6 @@ public class MapsActivity extends FragmentActivity implements
     private Marker userMarker;
     private Marker blueMarker;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        toolbar.setTitle("Maps");
-        mFirebaseFirestoreRef = FirebaseFirestore.getInstance();
-        mUserLocation = getIntent().getParcelableExtra("CurrentLocation");
-        Log.d(TAG, "onCreate: " +mUserLocation.getGeo_point().toString());
-        initMap();
-    }
-
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
     private static final int LOCATION_UPDATE_INTERVAL = 3000;
@@ -117,96 +104,9 @@ public class MapsActivity extends FragmentActivity implements
             }
         }, LOCATION_UPDATE_INTERVAL);
     }
-
-    /*
-        CALLBACK FUNCTIONSS
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        Toast.makeText(this, "Map is ready", Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "onMapReady: map is ready!");
-        mMap = googleMap;
-        if(mUserLocation == null) {
-            DocumentReference d = mFirebaseFirestoreRef
-                    .collection(getString(R.string.collection_user_locations))
-                    .document(FirebaseAuth.getInstance().getUid());
-            d.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if(task.isSuccessful()){
-                        mUserLocation = task.getResult().toObject(UserLocation.class);
-                        moveCamera(mUserLocation);
-                        checkDestinationAndRoute();
-                    }
-                }
-            });
-        }
-
-        moveCamera(mUserLocation);
-        checkDestinationAndRoute();
-
-        mMap.setOnMapLongClickListener(this);
-        mMap.setOnInfoWindowClickListener(this);
-        mMap.setOnPolylineClickListener(this);
-    }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        mLocationPermissionGranted = false;
-//        switch (requestCode){
-//            case LOCATION_PERMISSION_REQUEST_CODE:
-//            {
-//                if(grantResults.length > 0){
-//                    for (int i = 0; i < grantResults.length; i++){
-//                        if(grantResults[i] != PackageManager.PERMISSION_GRANTED){
-//                            mLocationPermissionGranted = false;
-//                            break;
-//                        }
-//                    }
-//                    mLocationPermissionGranted = true;
-//                    //init map
-//                    initMap();
-//                }
-//            }
-//        }
-//    }
-
-
-
-//    private void getLocationPermission(){
-//        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
-//                Manifest.permission.ACCESS_COARSE_LOCATION};
-//
-//        if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
-//                FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-//            if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
-//                    COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-//                mLocationPermissionGranted = true;
-//            }
-//            else{
-//                ActivityCompat.requestPermissions(this,
-//                        permissions,LOCATION_PERMISSION_REQUEST_CODE);
-//            }
-//        }
-//    }
-
-
-    private void initMap(){
-        Log.d(TAG, "initMap: initializing");
-        mMapView = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mMapView.getMapAsync(this);
-        if(mGeoApiContext == null){
-            mGeoApiContext = new GeoApiContext.Builder()
-                    .apiKey(getString(R.string.google_maps_api_key))
-                    .build();
-        }
-    }
-
     private void stopLocationUpdates() {
         mHandler.removeCallbacks(mRunnable);
     }
-
     private void retrieveUserLocation(){
         DocumentReference userLocationRef = mFirebaseFirestoreRef
                 .collection(getString(R.string.collection_user_locations))
@@ -230,44 +130,80 @@ public class MapsActivity extends FragmentActivity implements
         });
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar.setTitle("Maps");
+
+
+        mFirebaseFirestoreRef = FirebaseFirestore.getInstance();
+
+        //success!
+        mUserLocation = getIntent().getParcelableExtra("CurrentLocation");
+
+        initMap();
+    }
+
+
 
     /*
-        UTIL METHOD!
+        CALLBACK FUNCTIONSS
      */
-//    private void getDeviceLocation(){
-//        Log.d(TAG, "getDeviceLocation: a;sdlkfjas;lkdfjasdfl;asjdfa;slkfjasl;kfdjas;df");
-//        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-//        try{
-//            if(mLocationPermissionGranted){
-//                final Task location = mFusedLocationProviderClient.getLastLocation();
-//                location.addOnCompleteListener(new OnCompleteListener() {
-//                    @Override
-//                    public void onComplete(@NonNull Task task) {
-//                        if(task.isSuccessful()){
-//                            Log.d(TAG, "onComplete: Success!");
-//                            Location currentLocation = (Location) task.getResult();
-//                            marker = new MarkerOptions()
-//                                    .position(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()))
-//                                    .title(((UserClient)(getApplication())).getUser().getEmail());
-//                            mMap.addMarker(marker);
-//                            //moveCamera(currentLocation);
-//                        }
-//                        else{
-//                            Log.d(TAG, "onComplete: current Location is null");
-//                            Toast.makeText(MapsActivity.this, "Unable to get current location", Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                });
-//            }
-//
-//        }catch(SecurityException e){
-//            Log.d(TAG, "getDeviceLocation: SecurityException " + e.getMessage());
-//            Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
-//        }
-//    }
+    private void initMap(){
+        Log.d(TAG, "initMap: initializing");
+        mMapView = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mMapView.getMapAsync(this);
+        if(mGeoApiContext == null){
+            mGeoApiContext = new GeoApiContext.Builder()
+                    .apiKey(getString(R.string.google_maps_api_key))
+                    .build();
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        Toast.makeText(this, "Map is ready", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "onMapReady: map is ready!");
+        mMap = googleMap;
+        moveCamera(mUserLocation);
+        mMap.setOnMapLongClickListener(this);
+        mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnPolylineClickListener(this);
+    }
 
 
+
+
+
+
+
+    private void moveCamera(UserLocation mUserPosition){
+        double bottomBoundary = mUserPosition.getGeo_point().getLatitude() - .1;
+        double leftBoundary = mUserPosition.getGeo_point().getLongitude() - .1;
+        double topBoundary = mUserPosition.getGeo_point().getLatitude() + .1;
+        double rightBoundary = mUserPosition.getGeo_point().getLongitude() + .1;
+        mMapBoundary = new LatLngBounds(
+                new LatLng(bottomBoundary, leftBoundary),
+                new LatLng(topBoundary, rightBoundary)
+        );
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mMapBoundary, 0));
+        MarkerOptions marker = new MarkerOptions()
+                .position(new LatLng(
+                        mUserPosition.getGeo_point().getLatitude(),
+                        mUserPosition.getGeo_point().getLongitude()
+                ))
+                .title("This is you")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+        userMarker = mMap.addMarker(marker);
+
+        checkDestinationAndRoute();
+    }
     private void checkDestinationAndRoute() {
+
 
         DocumentReference destinationRef = mFirebaseFirestoreRef
                 .collection("UsersDestination")
@@ -277,62 +213,51 @@ public class MapsActivity extends FragmentActivity implements
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()){
                     GeoPoint geoPoint = task.getResult().getGeoPoint("destination");
-                    if(geoPoint != null){
-                        recalculateDirection(geoPoint);
+                    int route = task.getResult().getLong("route_index").intValue();
+                    if(task.getResult().getBoolean("hasDestination")){
+                        setDestination = true;
+                        if(task.getResult().getLong("route_index").intValue() != -1) {
+                            recalculateDirection(geoPoint, route);
+                            setDestinationMarker(geoPoint
+                                    ,task.getResult().getString("duration")
+                                    ,task.getResult().getLong("route_index").intValue() + 1);
+                            setRoute = true;
+                        }
+                        else
+                        {
+                            Toast.makeText(MapsActivity.this, "No selected route", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    else
+                    {
+                        setDestination = false;
+                        setDestination = false;
+                        Toast.makeText(MapsActivity.this, "No selected destination and route", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MapsActivity.this, "Long tap on the map to select destination", Toast.LENGTH_LONG).show();
                     }
                 }
             }
         });
     }
 
+    private void recalculateDirection(final GeoPoint geoPoint,final int routeIndex) {
 
-
-    private void moveCamera(UserLocation mUserPosition){
-
-        Log.d(TAG, "moveCamera: MOVEEEEEEEEEEEEEEEEEEEEEEE");
-
-        double bottomBoundary = mUserPosition.getGeo_point().getLatitude() - .1;
-        double leftBoundary = mUserPosition.getGeo_point().getLongitude() - .1;
-        double topBoundary = mUserPosition.getGeo_point().getLatitude() + .1;
-        double rightBoundary = mUserPosition.getGeo_point().getLongitude() + .1;
-
-        mMapBoundary = new LatLngBounds(
-                new LatLng(bottomBoundary, leftBoundary),
-                new LatLng(topBoundary, rightBoundary)
-        );
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mMapBoundary, 0));
-
-        MarkerOptions marker = new MarkerOptions()
-                .position(new LatLng(
-                        mUserPosition.getGeo_point().getLatitude(),
-                        mUserPosition.getGeo_point().getLongitude()
-                ))
-                .title("This is you")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-        userMarker = mMap.addMarker(marker);
-    }
-
-
-
-
-
-    private void recalculateDirection(final GeoPoint geoPoint) {
-        setDestination = true;
-        setRoute = true;
         final com.google.maps.model.LatLng destination = new com.google.maps.model.LatLng(
                 geoPoint.getLatitude(),
                 geoPoint.getLongitude()
         );
-
         DirectionsApiRequest directions = new DirectionsApiRequest(mGeoApiContext);
         directions.alternatives(true);
+
+
+        //setting the origin , by user location
         directions.origin(
                 new com.google.maps.model.LatLng(
                         mUserLocation.getGeo_point().getLatitude(),
                         mUserLocation.getGeo_point().getLongitude()
                 )
         );
+
         Log.d(TAG, "calculateDirections: destination: " + destination.toString());
         directions.destination(destination).setCallback(new PendingResult.Callback<DirectionsResult>() {
             @Override
@@ -350,7 +275,7 @@ public class MapsActivity extends FragmentActivity implements
                             mPolyLinesData = new ArrayList<>();
                         }
 
-                            DirectionsRoute route = result.routes[index];
+                            DirectionsRoute route = result.routes[routeIndex];
                             Log.d(TAG, "run: leg: " + route.legs[0].toString());
                             List<com.google.maps.model.LatLng> decodedPath = PolylineEncoding.decode(route.overviewPolyline.getEncodedPath());
 
@@ -366,22 +291,16 @@ public class MapsActivity extends FragmentActivity implements
                                         latLng.lng
                                 ));
                             }
+
                             Polyline polyline = mMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
                             polyline.setColor(ContextCompat.getColor(MapsActivity.this, R.color.palette2));
-                            polyline.setClickable(true);
                             mPolyLinesData.add(new PolylineData(polyline, route.legs[0]));
                             //onPolylineClick(polyline);
                         PolylineData p = mPolyLinesData.get(0);
-//                            marker.remove();
-                        Toast.makeText(MapsActivity.this, "A:SLKDJAS:LKDJASDASD:LASKDJAS:LDKAJSD:ASLDKJ" + p.getLeg().endLocation.lat, Toast.LENGTH_SHORT).show();
-                        MarkerOptions m = new MarkerOptions()
-                                .position(new LatLng(p.getLeg().endLocation.lat,p.getLeg().endLocation.lat))
-                                .title("Route: " + index)
-                                .snippet("Duration: " + p.getLeg().arrivalTime)
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                        mMap.addMarker(m);
+//
                     }
                 });
+
             }
             @Override
             public void onFailure(Throwable e) {
@@ -389,9 +308,17 @@ public class MapsActivity extends FragmentActivity implements
 
             }
         });
+
+
     }
-
-
+    private void setDestinationMarker(GeoPoint g,String duration,int route){
+        destinationMarker = new MarkerOptions()
+                .position(new LatLng(g.getLatitude(),g.getLongitude()))
+                .title("Route: " + route)
+                .snippet("Duration: " + duration)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+        blueMarker = mMap.addMarker(destinationMarker);
+    }
 
     private void calculateDirections(Marker marker){
         Log.d(TAG, "calculateDirections: calculating directions.");
@@ -526,12 +453,14 @@ public class MapsActivity extends FragmentActivity implements
                     destinationMarker = new MarkerOptions()
                             .position(latLng)
                             .title("Destination")
+                            .snippet("Tap to view possible routes")
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                     blueMarker = mMap.addMarker(destinationMarker);
                 } else {
                     blueMarker.setVisible(true);
                     blueMarker.setPosition(latLng);
                 }
+                setDestination = true;
             } else {
                 showAlertChangeDestination(latLng);
             }
@@ -554,17 +483,38 @@ public class MapsActivity extends FragmentActivity implements
                         MarkerOptions newDestination = new MarkerOptions()
                                 .position(latLng)
                                 .title("Destination")
+                                .snippet("Tap to view routes to this location")
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                         MarkerOptions refUserMarker = new MarkerOptions()
                                 .position(new LatLng(mUserLocation.getGeo_point().getLatitude(), mUserLocation.getGeo_point().getLongitude()))
                                 .title("This is you")
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
+                        DocumentReference destinationRef = mFirebaseFirestoreRef
+                                .collection("UsersDestination")
+                                .document(FirebaseAuth.getInstance().getUid());
+
+                        Map<String,Object> hash = new HashMap<>();
+
+                        hash.put("user_location",mUserLocation);
+                        hash.put("destination",new GeoPoint(latLng.latitude,latLng.latitude));
+                        hash.put("route_index",-1);
+                        hash.put("duration","null");
+                        hash.put("hasDestination",true);
+                        destinationRef.set(hash).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()){
+                                    Log.d(TAG, "onComplete: saving users destination");
+                                    Toast.makeText(MapsActivity.this, "Save as current destination", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+
+                        setDestination = true;
+                        setRoute = false;
                         blueMarker = mMap.addMarker(newDestination);
                         userMarker = mMap.addMarker(refUserMarker);
-                        setDestination = false;
-                        setRoute = false;
-
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -588,10 +538,7 @@ public class MapsActivity extends FragmentActivity implements
                 marker.hideInfoWindow();
                 return;
             }
-
             Toast.makeText(this, "marker " + marker.getTitle(), Toast.LENGTH_SHORT).show();
-
-
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("Determine routes in this location?")
                     .setCancelable(true)
@@ -600,7 +547,6 @@ public class MapsActivity extends FragmentActivity implements
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                             blueMarker.setVisible(false);
-                            setDestination = true;
                             calculateDirections(marker);
                         }
                     })
@@ -616,7 +562,7 @@ public class MapsActivity extends FragmentActivity implements
 
     }
 
-    private void setAsSelectedRoute(final Marker m) {
+    private void setAsSelectedRoute(final Marker marker) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Set this as selected route?")
                 .setCancelable(true)
@@ -627,14 +573,12 @@ public class MapsActivity extends FragmentActivity implements
                         DocumentReference destinationRef = mFirebaseFirestoreRef
                                 .collection("UsersDestination")
                                 .document(FirebaseAuth.getInstance().getUid());
-
                         Map<String,Object> hash = new HashMap<>();
-
+                        hash.put("destination",new GeoPoint(marker.getPosition().latitude,marker.getPosition().longitude));
                         hash.put("user_location",mUserLocation);
-                        hash.put("destination",new GeoPoint(m.getPosition().latitude,m.getPosition().longitude));
-                        hash.put("route_index",index);
+                        hash.put("route_index",index-1);
                         hash.put("duration",tripDuration);
-                        hash.put("hasDestination",false);
+                        hash.put("hasDestination",true);
                         destinationRef.set(hash).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -689,4 +633,39 @@ public class MapsActivity extends FragmentActivity implements
         stopLocationUpdates(); // stop updating user locations
         super.onPause();
     }
+
+        /*
+        UTIL METHOD!
+     */
+//    private void getDeviceLocation(){
+//        Log.d(TAG, "getDeviceLocation: a;sdlkfjas;lkdfjasdfl;asjdfa;slkfjasl;kfdjas;df");
+//        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+//        try{
+//            if(mLocationPermissionGranted){
+//                final Task location = mFusedLocationProviderClient.getLastLocation();
+//                location.addOnCompleteListener(new OnCompleteListener() {
+//                    @Override
+//                    public void onComplete(@NonNull Task task) {
+//                        if(task.isSuccessful()){
+//                            Log.d(TAG, "onComplete: Success!");
+//                            Location currentLocation = (Location) task.getResult();
+//                            marker = new MarkerOptions()
+//                                    .position(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()))
+//                                    .title(((UserClient)(getApplication())).getUser().getEmail());
+//                            mMap.addMarker(marker);
+//                            //moveCamera(currentLocation);
+//                        }
+//                        else{
+//                            Log.d(TAG, "onComplete: current Location is null");
+//                            Toast.makeText(MapsActivity.this, "Unable to get current location", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                });
+//            }
+//
+//        }catch(SecurityException e){
+//            Log.d(TAG, "getDeviceLocation: SecurityException " + e.getMessage());
+//            Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 }

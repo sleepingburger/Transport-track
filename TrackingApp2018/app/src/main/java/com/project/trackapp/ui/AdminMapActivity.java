@@ -202,7 +202,7 @@ public class AdminMapActivity extends FragmentActivity implements OnMapReadyCall
                 //Log.d(TAG, "addMapMarkers: location: " + userLocation.getGeo_point().toString());
                 try{
                     String snippet = "";
-                    Log.d(TAG, "addMapMarkers: NAUNA?");
+                    Log.d(TAG, "addMapMarkers: ?" + userLocation.getUser());
                     snippet = "tap to view route";
                     i++;
                     int avatar = R.drawable.ic_main_icon; // set the default avatar

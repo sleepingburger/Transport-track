@@ -100,6 +100,10 @@ public class SendMessageFragment extends Fragment implements View.OnClickListene
                 }
             });
         }
+        else
+        {
+            Toast.makeText(getActivity().getApplicationContext(), "All fields are required! ", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private boolean validateFields() {

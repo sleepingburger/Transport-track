@@ -60,13 +60,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "MainActivity";
 
-    DocumentReference userRef;
+    private DocumentReference userRef;
 
-    ListenerRegistration userCount;
-
-
-
-    CollectionReference notifsRef;
+    private ListenerRegistration userCount;
     private FirebaseFirestore mDb;
 
 
@@ -74,26 +70,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FusedLocationProviderClient mFusedLocationClient;
     private UserLocation mUserLocation;
 
-
-    ArrayList<Messages> messages = new ArrayList<>();
-
-
-
-    private TextView tvNotifCount;
-
-    private int notif_count = 0;
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.viewmap_button).setOnClickListener(this);
         findViewById(R.id.accountsettings_button).setOnClickListener(this);
+        findViewById(R.id.notif_button).setOnClickListener(this);
 
         Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Track App 2019");
+
+
         setSupportActionBar(toolbar);
         mDb = FirebaseFirestore.getInstance();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -115,8 +103,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
+        goOffline();
+    }
+
+
+    private void goOffline() {
+        userRef.update("status",false).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "onSuccess: OFFLINE!");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void getLocationPermission() {
@@ -243,7 +247,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(!isLocationServiceRunning()){
             Intent serviceIntent = new Intent(this, LocationService.class);
 //        this.startService(serviceIntent);
-
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
 
                 MainActivity.this.startForegroundService(serviceIntent);
@@ -286,7 +289,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return true;
 
     }
-
     private void buildAlertMessageNoGps() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("This application requires GPS to work properly, do you want to enable it?")
@@ -323,8 +325,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
-
     private void firebaseSetup() {
         userRef = mDb
                 .collection(getString(R.string.collection_users))
@@ -347,34 +347,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.e(TAG, "onFailure:  Exception" + e.getMessage());
             }
         });
-
-
-
-
     }
 
-
-    private void getNotificationCount(){
-        notifsRef = mDb
-                .collection(getString(R.string.collection_user_notification))
-                .document(FirebaseAuth.getInstance().getUid())
-                .collection(getString(R.string.collection_notifications));
-
-        userCount = notifsRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.e(TAG, "onEvent: Listen failed.", e);
-                    return;
-                }
-                if(queryDocumentSnapshots != null){
-                    notif_count = queryDocumentSnapshots.size();
-                    tvNotifCount.setText("" + notif_count);
-                }
-            }
-        });
-
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -390,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 userRef.update("status",false).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(MainActivity.this, "Logut! ", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Logout ", Toast.LENGTH_SHORT).show();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override

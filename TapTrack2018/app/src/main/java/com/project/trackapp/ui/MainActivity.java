@@ -90,10 +90,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.viewmap_button).setOnClickListener(this);
-        findViewById(R.id.notif_button).setOnClickListener(this);
         findViewById(R.id.accountsettings_button).setOnClickListener(this);
 
-        tvNotifCount = (TextView)findViewById(R.id.notif_count);
         Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Track App 2019");
         setSupportActionBar(toolbar);

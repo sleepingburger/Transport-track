@@ -89,8 +89,7 @@ public class SendMessageFragment extends Fragment implements View.OnClickListene
                     .document();
 
             String desc = description.getText().toString().equals("")?"No Description":description.getText().toString();
-            Customer c = new Customer(Integer.parseInt(trackNumber),fname,lname,mAddress,Long.parseLong(mMobile),mEmail,desc);
-
+            Customer c = new Customer(Integer.parseInt(trackNumber),fname,lname,mAddress,Long.parseLong(mMobile),mEmail,desc,null);
             customer.set(c).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {

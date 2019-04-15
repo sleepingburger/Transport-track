@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.viewmap_button).setOnClickListener(this);
-        findViewById(R.id.accountsettings_button).setOnClickListener(this);
         findViewById(R.id.notif_button).setOnClickListener(this);
 
         Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
@@ -402,9 +401,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch(v.getId())
         {
-            case R.id.accountsettings_button: {
-                break;
-            }
             case R.id.notif_button: {
                 Intent intent = new Intent(MainActivity.this, ChatRoomActivity.class);
                 intent.putExtra("uid",FirebaseAuth.getInstance().getUid());

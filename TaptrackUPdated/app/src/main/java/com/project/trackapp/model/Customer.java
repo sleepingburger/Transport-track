@@ -15,6 +15,25 @@ public class Customer implements Parcelable {
     private long mobile;
     private String email;
     private String description;
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    private String uid;
+    private String status;
     private @ServerTimestamp
     Date timestamp;
 
@@ -26,6 +45,8 @@ public class Customer implements Parcelable {
         mobile = in.readLong();
         email = in.readString();
         description = in.readString();
+        uid = in.readString();
+        status = in.readString();
     }
 
     public static final Creator<Customer> CREATOR = new Creator<Customer>() {
@@ -57,7 +78,7 @@ public class Customer implements Parcelable {
     }
 
     public Customer(){}
-    public Customer(int deliveryNumber, String firstName, String lastName, String address, long mobile, String email,String description,Date timestamp) {
+    public Customer(int deliveryNumber, String firstName, String lastName, String address, long mobile, String email,String description,Date timestamp,String uid,String status) {
         this.deliveryNumber = deliveryNumber;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -66,6 +87,8 @@ public class Customer implements Parcelable {
         this.email = email;
         this.description = description;
         this.timestamp = timestamp;
+        this.status = status;
+        this.uid = uid;
     }
 
     public String getDescription() {
@@ -143,5 +166,7 @@ public class Customer implements Parcelable {
         dest.writeLong(mobile);
         dest.writeString(email);
         dest.writeString(description);
+        dest.writeString(uid);
+        dest.writeString(status);
     }
 }

@@ -56,12 +56,17 @@ public class SendMessageFragment extends Fragment implements View.OnClickListene
         mobile = (EditText)view.findViewById(R.id.mobile);
         address = (EditText)view.findViewById(R.id.address);
         description = (EditText)view.findViewById(R.id.description);
+        clear();
+    }
+
+    private void clear(){
         firstname.setText("");
         lastname.setText("");
         trackno.setText("");
         email.setText("");
         mobile.setText("");
         address.setText("");
+        description.setText("");
     }
 
 
@@ -91,18 +96,13 @@ public class SendMessageFragment extends Fragment implements View.OnClickListene
                     .document();
 
             String desc = description.getText().toString().equals("")?"No Description":description.getText().toString();
-            Customer c = new Customer(Integer.parseInt(trackNumber),fname,lname,mAddress,Long.parseLong(mMobile),mEmail,desc,null);
+            Customer c = new Customer(Integer.parseInt(trackNumber),fname,lname,mAddress,Long.parseLong(mMobile),mEmail,desc,null,customer.getId(),"Pending");
             customer.set(c).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if(task.isSuccessful()){
                         Log.d(TAG, "onComplete: SUCCESSFULLY ADDED THE CUSTOMER");
-                        firstname.setText("");
-                        lastname.setText("");
-                        trackno.setText("");
-                        email.setText("");
-                        mobile.setText("");
-                        address.setText("");
+                        clear();
                         Toast.makeText(getActivity().getApplicationContext(), "Customer Added Successfully!", Toast.LENGTH_SHORT).show();
                     }
                 }

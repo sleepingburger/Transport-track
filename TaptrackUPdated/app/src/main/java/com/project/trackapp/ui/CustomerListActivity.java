@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,9 +45,13 @@ public class CustomerListActivity extends AppCompatActivity implements CustomerA
 
     RecyclerView mCustomerListRecyclerView;
 
+    ArrayList<User> userList = new ArrayList<>();
 
     CollectionReference userRef;
 
+    Customer customer;
+
+    User user;
     RecyclerView listOnlineRecyclerView;
     private static final String TAG = "CustomerListActivity";
     ArrayList<Customer> mCustomersList = new ArrayList<>();
@@ -73,7 +78,27 @@ public class CustomerListActivity extends AppCompatActivity implements CustomerA
     }
 
     private void firebaseRefSetup() {
+        Log.d(TAG, "firebaseRefSetup: " +userList.size());
         Query query = userRef.orderBy("status", Query.Direction.DESCENDING);
+
+        try {
+            query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if(task.isSuccessful()){
+                        userList.addAll(task.getResult().toObjects(User.class));
+                        if(userList.size() == 0){
+                            startActivity(new Intent(CustomerListActivity.this,AdminActivity.class));
+                        }
+                    }
+                }
+            });
+        }catch (NullPointerException e){
+            Toast.makeText(this, "Error in this activity", Toast.LENGTH_SHORT).show();
+        }
+
+
+
         //Query query = userRef.orderBy("email", Query.Direction.DESCENDING);
         FirestoreRecyclerOptions<User> options = new FirestoreRecyclerOptions.Builder<User>()
                 .setQuery(query, User.class).build();
@@ -122,9 +147,10 @@ public class CustomerListActivity extends AppCompatActivity implements CustomerA
     }
 
     @Override
-    public void onCustomerClick(int position, View v) {
+    public void onCustomerClick(final int position, View v) {
         switch (v.getId()){
             case R.id.textViewOptions:{
+                customer = mCustomersList.get(position);
                 PopupMenu popup = new PopupMenu(this,v);
                 //inflating menu from xml resource
                 popup.inflate(R.menu.customer_menu);
@@ -137,7 +163,14 @@ public class CustomerListActivity extends AppCompatActivity implements CustomerA
                                 assignToUser();
                                 return true;
                             }
+                            case R.id.send_message_button:{
+
+                                openSms();
+
+                                return true;
+                            }
                             case R.id.delete_button:{
+                                deleteCustomer(position);
                                 return true;
                             }
                         }
@@ -149,20 +182,49 @@ public class CustomerListActivity extends AppCompatActivity implements CustomerA
             }
         }
     }
-    private void assignToUser() {
-        mCustomerListRecyclerView.setVisibility(View.GONE);
-        listOnlineRecyclerView.setVisibility(View.VISIBLE);
-    }
-    @Override
-    public void onUserClick(int position, View v) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Assign this customer to \n"+ position)
+
+    private void deleteCustomer(final int pos) {
+               final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want delete?")
                 .setCancelable(true)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(CustomerListActivity.this, "Success", Toast.LENGTH_SHORT).show();
-                        assign();
+
+                        customerList.document(customer.getUid()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()){
+                                    mCustomersList.remove(pos);
+                                    adapter.notifyDataSetChanged();
+                                    Toast.makeText(CustomerListActivity.this, "Deleted Successfully", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
+
+    }
+
+    private void openSms() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Open the SMS app?")
+                .setCancelable(true)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+                        sendIntent.setData(Uri.parse("sms:+63" + customer.getMobile()));
+                        startActivity(sendIntent);
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -175,11 +237,53 @@ public class CustomerListActivity extends AppCompatActivity implements CustomerA
         alert.show();
     }
 
-    private void assign() {
+    private void assignToUser() {
+        mCustomerListRecyclerView.setVisibility(View.GONE);
+        listOnlineRecyclerView.setVisibility(View.VISIBLE);
+    }
+    @Override
+    public void onUserClick(int position, View v) {
+        user = userList.get(position);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Assign this customer to "+ user.getEmail())
+                .setCancelable(true)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        assign(user.getUid());
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void assign(final String userUID) {
+        customer.setStatus("Ongoing assign to "+ user.getEmail().substring(0,user.getEmail().indexOf("@")));
+        customerList.document(customer.getUid()).set(customer).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    userRef.document(userUID).collection(getString(R.string.collection_customer))
+                            .document(customer.getUid()).set(customer).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                Toast.makeText(CustomerListActivity.this, "Success", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(CustomerListActivity.this,AdminActivity.class));
+                            }
+                        }
+                    });
 
 
-
-        startActivity(new Intent(CustomerListActivity.this,AdminActivity.class));
+                }
+            }
+        });
     }
 
     @Override

@@ -4,6 +4,9 @@
         android:id="@+id/assign_button"
         android:title="Assign to User"/>
     <item
+        android:id="@+id/send_message_button"
+        android:title="Send Message"/>
+    <item
         android:id="@+id/delete_button"
         android:title="Delete"/>
 </menu>

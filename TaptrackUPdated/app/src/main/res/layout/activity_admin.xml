@@ -24,44 +24,46 @@
         android:weightSum="100">
 
 
-
-
-
-        <Button
-            android:id="@+id/addcustomer_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/orangy"
-            android:text="Add Customer"
-            android:textAllCaps="false"
-            android:layout_marginTop="5dp"
-            android:textColor="@color/white"
-            android:textSize="20sp"/>
-        <Button
-            android:id="@+id/viewcustomer_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/palette1"
-            android:text="View Customer"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:layout_marginTop="5dp"
-
-            android:textSize="20sp"/>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/listonline_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="100"></android.support.v7.widget.RecyclerView>
 
+
+        <Button
+            android:id="@+id/viewcustomer_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="#36B7C1"
+            android:text="View Customer"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/addcustomer_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="#02838C"
+            android:text="Add Customer"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+
         <Button
             android:id="@+id/viewmap_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="#36B7C1"
             android:text="View Map"
             android:textAllCaps="false"
-
             android:textColor="@color/white"
             android:textSize="20sp" />
 
@@ -70,17 +72,16 @@
     <FrameLayout
         android:id="@+id/map_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </FrameLayout>
+        android:layout_height="match_parent"></FrameLayout>
+
     <FrameLayout
+        android:id="@+id/create_message_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/create_message_container">
-    </FrameLayout>
+        android:layout_height="match_parent"></FrameLayout>
+
     <FrameLayout
+        android:id="@+id/customer_list_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/customer_list_container">
-    </FrameLayout>
+        android:layout_height="match_parent"></FrameLayout>
 
 </RelativeLayout>

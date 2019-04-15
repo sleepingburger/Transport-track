@@ -56,7 +56,7 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
 
 
 
-    ArrayList<Customer> mCustomerList;
+    ArrayList<Customer> mCustomerList = new ArrayList<>();
     int userPosition = 0;
     //firebase references
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -95,30 +95,14 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
 
 
 
-        setUpCustomers();
+
 
         saveAdmin();
 
 
     }
 
-    private void setUpCustomers() {
-        CollectionReference clients = db
-                .collection(getString(R.string.collection_customer));
 
-        clients.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful()){
-                    for(int i = 0; i < task.getResult().getDocuments().size(); i++){
-                        Log.d(TAG, "onComplete: CUSSTOMER HAS BEEN ADDED");
-                        Customer c = task.getResult().getDocuments().get(i).toObject(Customer.class);
-                        mCustomerList.add(c);
-                    }
-                }
-            }
-        });
-    }
 
     private void saveAdmin() {
         User admin = new User("Admin",
@@ -134,7 +118,7 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
         FirestoreRecyclerOptions<User> options = new FirestoreRecyclerOptions.Builder<User>()
                 .setQuery(query, User.class).build();
 
-        adapter = new UserAdapter(options,this, this);
+        adapter = new UserAdapter(options,this, this,true);
 
         RecyclerView recyclerView = findViewById(R.id.listonline_recyclerview);
         recyclerView.setHasFixedSize(true);
@@ -146,6 +130,7 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
     protected void onResume() {
         super.onResume();
         getUsers();
+
     }
 
     private void getUsers() {
@@ -259,16 +244,9 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void inflateCustomerList() {
-        CustomerListFragment fragment = CustomerListFragment.newInstance();
 
-        Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList(getString(R.string.intent_customer_list), mCustomerList);
-        fragment.setArguments(bundle);
-
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.customer_list_container, fragment, getString(R.string.customer_list));
-        transaction.addToBackStack(getString(R.string.customer_list));
-        transaction.commit();
+        Intent intent = new Intent(AdminActivity.this,CustomerListActivity.class);
+        startActivity(intent);
     }
 
     private void inflateMap() {
@@ -309,7 +287,6 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
                             case R.id.send_message: {
                                 userPosition = position;
                                 inflateNewMessage(userPosition);
-
                                 return true;
                             }
                         }

@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         findViewById(R.id.viewmap_button).setOnClickListener(this);
         findViewById(R.id.notif_button).setOnClickListener(this);
-
+        findViewById(R.id.task_button).setOnClickListener(this);
         Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Track App 2019");
 
@@ -158,7 +158,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         mUserLocation.setUser(user);
                         ((UserClient)(getApplication())).setUser(mUserLocation.getUser());
                         getLastKnownLocation();
-
                     }
                 }
             });
@@ -417,7 +416,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     finish();
                     break;
                 }
-
+            }
+            case R.id.task_button:{
+                Intent intent = new Intent(MainActivity.this,UserCustomerActivity.class);
+                startActivity(intent);
+                break;
             }
         }
     }

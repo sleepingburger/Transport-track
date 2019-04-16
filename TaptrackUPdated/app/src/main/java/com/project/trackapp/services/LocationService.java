@@ -17,6 +17,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -24,6 +25,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -33,6 +36,7 @@ import com.project.trackapp.model.User;
 import com.project.trackapp.R;
 import com.project.trackapp.UserClient;
 import com.project.trackapp.model.UserLocation;
+import com.project.trackapp.ui.MainActivity;
 
 public class LocationService extends Service {
     private static final String TAG = "LocationService";
@@ -45,6 +49,12 @@ public class LocationService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: HELLO");
     }
 
     @Override
@@ -85,6 +95,10 @@ public class LocationService extends Service {
         mLocationRequestHighAccuracy.setFastestInterval(FASTEST_INTERVAL);
 
 
+
+
+
+
         // new Google API SDK v11 uses getFusedLocationProviderClient(this)
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -113,6 +127,11 @@ public class LocationService extends Service {
     private void saveUserLocation(final UserLocation userLocation){
 
         try{
+
+
+
+
+
             DocumentReference locationRef = FirebaseFirestore.getInstance()
                     .collection(getString(R.string.collection_user_locations))
                     .document(FirebaseAuth.getInstance().getUid());
@@ -124,6 +143,7 @@ public class LocationService extends Service {
                         Log.d(TAG, "onComplete: \n inserted user location into database." +
                                 "\n latitude: " + userLocation.getGeo_point().getLatitude() +
                                 "\n longitude: " + userLocation.getGeo_point().getLongitude());
+
                     }
                 }
             });

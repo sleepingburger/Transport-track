@@ -24,6 +24,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -40,6 +42,7 @@ import com.project.trackapp.R;
 import com.project.trackapp.model.PolylineData;
 import com.project.trackapp.model.UserLocation;
 import com.project.trackapp.model.User;
+import com.project.trackapp.util.GoOnline;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -120,6 +123,8 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        pushOnline();
+
         /*Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbar.setTitle("Maps");
         */
@@ -133,6 +138,15 @@ public class MapsActivity extends FragmentActivity implements
         initMap();
     }
 
+    public void pushOnline() {
+        Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run(){
+                new GoOnline().pushOnline(TAG);
+            }
+        },1000);
+    }
 
 
     /*
@@ -586,9 +600,12 @@ public class MapsActivity extends FragmentActivity implements
         alert.show();
     }
 
+
     @Override
     protected void onResume() {
         super.onResume();
+
+        new GoOnline().pushOnline(TAG);
         startUserLocationsRunnable();
         mMapView.onResume();
     }
@@ -617,8 +634,28 @@ public class MapsActivity extends FragmentActivity implements
     public void onPause() {
         mMapView.onPause();
         stopLocationUpdates(); // stop updating user locations
+        goOffline();
         super.onPause();
     }
+
+
+
+
+
+    private void goOffline() {
+        mFirebaseFirestoreRef.collection("ActiveUsers").document(FirebaseAuth.getInstance().getUid()).update("status",false).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "onSuccess: OFFLINE!");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: Error");
+            }
+        });
+    }
+
 
         /*
         UTIL METHOD!

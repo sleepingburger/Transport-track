@@ -1,5 +1,6 @@
 package com.project.trackapp.ui;
 
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -13,7 +14,10 @@ import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -31,6 +35,7 @@ import com.project.trackapp.model.User;
 import com.project.trackapp.model.ChatMessage;
 import com.project.trackapp.model.UserLocation;
 import com.project.trackapp.util.ChatMessageRecyclerAdapter;
+import com.project.trackapp.util.GoOnline;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -61,6 +66,9 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        pushOnline();
+
         setContentView(R.layout.activity_notification);
         mMessage = findViewById(R.id.input_message);
         mChatMessageRecyclerView = findViewById(R.id.chatmessage_recycler_view);
@@ -77,6 +85,16 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //        getSupportActionBar().setHomeButtonEnabled(true);
         initChatroomRecyclerView();
+    }
+
+    public void pushOnline() {
+        Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run(){
+                new GoOnline().pushOnline(TAG);
+            }
+        },1000);
     }
 
     private void getUserLocation(User user){
@@ -230,7 +248,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onResume() {
         super.onResume();
-
+        new GoOnline().pushOnline(TAG);
         getChatMessages();
 
     }

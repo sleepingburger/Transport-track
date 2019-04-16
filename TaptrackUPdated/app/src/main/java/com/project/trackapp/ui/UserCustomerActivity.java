@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +19,8 @@ import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
@@ -29,11 +32,12 @@ import com.project.trackapp.R;
 import com.project.trackapp.model.Customer;
 import com.project.trackapp.model.User;
 import com.project.trackapp.util.CustomerAdapter;
+import com.project.trackapp.util.GoOnline;
 import com.project.trackapp.util.UserAdapter;
 
 import java.util.ArrayList;
 
-public class UserCustomerActivity extends AppCompatActivity implements CustomerAdapter.OnCustomerListener{
+public class UserCustomerActivity extends AppCompatActivity implements CustomerAdapter.OnCustomerListener {
 
 
     CollectionReference customerList;
@@ -59,8 +63,17 @@ public class UserCustomerActivity extends AppCompatActivity implements CustomerA
 
 
     @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        new GoOnline().pushOnline(TAG);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        pushOnline();
+
         setContentView(R.layout.activity_user_customer);
 
         customerList = mDb.collection(getString(R.string.collection_customer));
@@ -70,8 +83,27 @@ public class UserCustomerActivity extends AppCompatActivity implements CustomerA
         setUpCustomers();
     }
 
+    public void pushOnline() {
+        Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run(){
+                new GoOnline().pushOnline(TAG);
+            }
+        },1000);
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        new GoOnline().pushOnline(TAG);
+    }
+
 
     public void setUpCustomers() {
+        new GoOnline().pushOnline(TAG);
+
         mCustomersList.clear();
         CollectionReference clients = mDb.collection("ActiveUsers")
                 .document(FirebaseAuth.getInstance().getUid())
@@ -93,6 +125,32 @@ public class UserCustomerActivity extends AppCompatActivity implements CustomerA
         });
 
     }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        goOffline();
+    }
+
+
+
+
+    private void goOffline() {
+        FirebaseFirestore.getInstance().collection("ActiveUsers").document(FirebaseAuth.getInstance().getUid())
+                .update("status",false).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "onSuccess: OFFLINE!");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(UserCustomerActivity.this, "Error", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
     private void initCustomerrListRecyclerView() {
         adapter = new CustomerAdapter(mCustomersList,this,this);

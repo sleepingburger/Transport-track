@@ -21,7 +21,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -33,31 +32,28 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.project.trackapp.R;
 import com.project.trackapp.UserClient;
-import com.project.trackapp.model.Messages;
 import com.project.trackapp.model.User;
 import com.project.trackapp.model.UserLocation;
 import com.project.trackapp.services.LocationService;
-
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
+import com.project.trackapp.util.GoOnline;
 
 import static com.project.trackapp.Constants.*;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
 
+
+
+
+    private boolean notResumed;
+    private boolean isViewMap = false;
     private static final String TAG = "MainActivity";
 
     private DocumentReference userRef;
@@ -90,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
+        new GoOnline().pushOnline(TAG);
         if(checkMapServices()){
             if(mLocationPermissionGranted){
                 getUserDetails();
@@ -102,17 +99,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        new GoOnline().pushOnline(TAG);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
+    }
+
+
+
+
+    @Override
     protected void onStop() {
         super.onStop();
         goOffline();
     }
 
 
+
+
     private void goOffline() {
         userRef.update("status",false).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Log.d(TAG, "onSuccess: OFFLINE!");
+                Log.d(TAG, "onSuccess:asdfasdf OFFLINE!");
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -202,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
                         mUserLocation.setGeo_point(geoPoint);
                         mUserLocation.setTimestamp(null);
+                        isViewMap = true;
                         saveUserLocation();
                         startLocationService();
                     }
@@ -407,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
             case R.id.viewmap_button: {
-                if(mUserLocation != null) {
+                if(mUserLocation != null && isViewMap) {
                     Intent intent = new Intent(MainActivity.this, MapsActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putParcelable("CurrentLocation",mUserLocation);

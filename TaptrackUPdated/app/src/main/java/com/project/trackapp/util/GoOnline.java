@@ -10,10 +10,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class GoOnline {
-    public void pushOnline(final String TAG){
+    public void pushOnline(final String TAG,final String UID){
         DocumentReference userRef = FirebaseFirestore.getInstance()
                 .collection("ActiveUsers")
-                .document(FirebaseAuth.getInstance().getUid());
+                .document(UID);
         userRef.update("status",true).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {

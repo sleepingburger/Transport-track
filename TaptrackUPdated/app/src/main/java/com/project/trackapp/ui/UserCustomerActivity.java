@@ -61,13 +61,6 @@ public class UserCustomerActivity extends AppCompatActivity implements CustomerA
     private UserAdapter mUserAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
-
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        new GoOnline().pushOnline(TAG);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,7 +81,7 @@ public class UserCustomerActivity extends AppCompatActivity implements CustomerA
         handler.postDelayed(new Runnable() {
             @Override
             public void run(){
-                new GoOnline().pushOnline(TAG);
+                new GoOnline().pushOnline(TAG,FirebaseAuth.getInstance().getUid());
             }
         },1000);
     }
@@ -97,12 +90,11 @@ public class UserCustomerActivity extends AppCompatActivity implements CustomerA
     @Override
     protected void onResume() {
         super.onResume();
-        new GoOnline().pushOnline(TAG);
+        new GoOnline().pushOnline(TAG,FirebaseAuth.getInstance().getUid());
     }
 
 
     public void setUpCustomers() {
-        new GoOnline().pushOnline(TAG);
 
         mCustomersList.clear();
         CollectionReference clients = mDb.collection("ActiveUsers")

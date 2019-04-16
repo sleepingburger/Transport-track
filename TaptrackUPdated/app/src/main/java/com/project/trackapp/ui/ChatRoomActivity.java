@@ -92,7 +92,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         handler.postDelayed(new Runnable() {
             @Override
             public void run(){
-                new GoOnline().pushOnline(TAG);
+                new GoOnline().pushOnline(TAG,FirebaseAuth.getInstance().getUid());
             }
         },1000);
     }
@@ -248,7 +248,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onResume() {
         super.onResume();
-        new GoOnline().pushOnline(TAG);
+        new GoOnline().pushOnline(TAG,FirebaseAuth.getInstance().getUid());
         getChatMessages();
 
     }

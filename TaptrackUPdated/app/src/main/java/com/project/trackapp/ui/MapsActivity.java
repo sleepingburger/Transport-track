@@ -143,7 +143,7 @@ public class MapsActivity extends FragmentActivity implements
         handler.postDelayed(new Runnable() {
             @Override
             public void run(){
-                new GoOnline().pushOnline(TAG);
+                new GoOnline().pushOnline(TAG,FirebaseAuth.getInstance().getUid());
             }
         },1000);
     }
@@ -605,7 +605,7 @@ public class MapsActivity extends FragmentActivity implements
     protected void onResume() {
         super.onResume();
 
-        new GoOnline().pushOnline(TAG);
+        new GoOnline().pushOnline(TAG,FirebaseAuth.getInstance().getUid());
         startUserLocationsRunnable();
         mMapView.onResume();
     }

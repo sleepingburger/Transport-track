@@ -48,13 +48,15 @@ public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.ViewHo
         viewHolder.status.setText(mCustomers.get(i).getStatus());
 
         if(mCustomers.get(i).getStatus().equals("Pending")) {
-            viewHolder.status.setTextColor(ContextCompat.getColor(mCtx, R.color.offline));
+            //viewHolder.status.setTextColor(ContextCompat.getColor(mCtx, R.color.offline));
+            viewHolder.itemView.setBackgroundColor(ContextCompat.getColor(mCtx,R.color.pending));
         }
         else if(mCustomers.get(i).getStatus().contains("Ongoing")){
-            viewHolder.status.setTextColor(ContextCompat.getColor(mCtx,R.color.online));
+            //viewHolder.status.setTextColor(ContextCompat.getColor(mCtx,R.color.online));
+            viewHolder.itemView.setBackgroundColor(ContextCompat.getColor(mCtx,R.color.ongoing));
         }
         else {
-            viewHolder.itemView.setBackgroundColor(ContextCompat.getColor(mCtx,R.color.palette1));
+            viewHolder.itemView.setBackgroundColor(ContextCompat.getColor(mCtx,R.color.done));
         }
     }
 

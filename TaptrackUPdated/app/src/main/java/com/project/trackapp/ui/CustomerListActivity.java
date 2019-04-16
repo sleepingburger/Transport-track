@@ -198,6 +198,7 @@ public class CustomerListActivity extends AppCompatActivity implements CustomerA
                                     mCustomersList.remove(pos);
                                     adapter.notifyDataSetChanged();
                                     Toast.makeText(CustomerListActivity.this, "Deleted Successfully", Toast.LENGTH_SHORT).show();
+                                    mCustomerListRecyclerView.setAdapter(adapter);
                                 }
                             }
                         });

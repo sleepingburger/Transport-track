@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        new GoOnline().pushOnline(TAG);
+        new GoOnline().pushOnline(TAG,FirebaseAuth.getInstance().getUid());
         if(checkMapServices()){
             if(mLocationPermissionGranted){
                 getUserDetails();
@@ -98,11 +98,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        new GoOnline().pushOnline(TAG);
-    }
 
     @Override
     protected void onDestroy() {

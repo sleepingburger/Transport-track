@@ -120,8 +120,9 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        /*Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbar.setTitle("Maps");
+        */
 
 
         mFirebaseFirestoreRef = FirebaseFirestore.getInstance();

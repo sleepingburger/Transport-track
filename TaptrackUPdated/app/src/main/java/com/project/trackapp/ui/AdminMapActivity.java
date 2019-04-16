@@ -91,11 +91,16 @@ public class AdminMapActivity extends FragmentActivity implements OnMapReadyCall
 
         if (mUserLocations.size() == 0) { // make sure the list doesn't duplicate by navigating back
             if (getIntent().getExtras() != null) {
-                final ArrayList<User> users = getIntent().getParcelableArrayListExtra(getString(R.string.intent_userlist));
-                mUserList.addAll(users);
-                final ArrayList<UserLocation> locations = getIntent().getParcelableArrayListExtra(getString(R.string.intent_user_locations));
-                mUserLocations.addAll(locations);
-                Log.d(TAG, "onCreate: " + mUserLocations.get(0).getGeo_point());
+                if(getIntent().getParcelableArrayListExtra(getString(R.string.intent_user_locations)).size() > 0) {
+                    final ArrayList<User> users = getIntent().getParcelableArrayListExtra(getString(R.string.intent_userlist));
+                    mUserList.addAll(users);
+                    final ArrayList<UserLocation> locations = getIntent().getParcelableArrayListExtra(getString(R.string.intent_user_locations));
+                    mUserLocations.addAll(locations);
+                    Log.d(TAG, "onCreate: " + mUserLocations.get(0).getGeo_point());
+                }
+                else
+                    Toast.makeText(this, "No Online Users", Toast.LENGTH_SHORT).show();
+                //can prompt to view last users destinations
             }
         }
 
@@ -103,7 +108,10 @@ public class AdminMapActivity extends FragmentActivity implements OnMapReadyCall
 
 
 
-        mUserPosition = mUserLocations.get(0);
+
+
+        if(mUserLocations.size() != 0)
+            mUserPosition = mUserLocations.get(0);
         Toast.makeText(this, "Google map", Toast.LENGTH_SHORT).show();
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         initGoogleMap();
@@ -237,7 +245,10 @@ public class AdminMapActivity extends FragmentActivity implements OnMapReadyCall
         mGoogleMap.clear();
         googleMap.getUiSettings().setZoomControlsEnabled(true);
         googleMap.getUiSettings().setCompassEnabled(true);
-        addMapMarkers();
+
+        if(mUserList.size() != 0) {
+            addMapMarkers();
+        }
 
     }
 
